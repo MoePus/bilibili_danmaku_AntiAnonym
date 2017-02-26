@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Reverse!</title>
+	<script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+	<script src="http://cdn.bootcss.com/materialize/0.98.0/js/materialize.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/materialize/0.98.0/css/materialize.min.css" media="screen,projection">
+	<!--<script src="/webpack-dev-server.js"></script>-->
+  </head>
+  <body class="grey lighten-2">
+	<style type="text/css">
+	body
+	{
+		overflow:scroll;
+		overflow-x:hidden;
+		display: flex;
+		min-height: 100vh;
+		flex-direction: column;
+	}
+	main {
+		flex: 1 0 auto;
+	}
+	</style>
+  	<header>
+	<nav class="top-nav grey" style="height:12%">
+	  <div class="container">
+		<div class="row">
+		  <div class="col s12 m9">
+				<h1 class="header center-on-small-only"  style="margin-top:2% height:6%">Reverse!</h1>
+				<h4 class="light center-on-small-only"  style="margin-bottom:0% height:2%">Fetch bilibili danmaku&amp;Reverse out the author</h4>
+		  </div>
+		</div>
+	  </div>
+	  <div id="progressBar" style="display:none">
+		<div class="progress grey lighten-3"  style="margin-bottom:0%">
+			<div class="indeterminate grey" style="margin-bottom:0%"></div>
+		</div>
+	  </div>
+	</nav>
+	</header>
+	<main>
+	<br>
+	<br>
+	<div class="container">
+	<form style="display:inline" action="javascript:void(0);xmlFecth();">
+		<div class="row">
+			<div class="input-field col s2">
+				<input class="validate" type="text" id="fetch_cid" placeholder="cid"></input>
+				<label for="fetch_cid" class="active">fetch</label>
+			</div>
+			<div class="input-field col s5">
+				<input class="col s3 btn blue-grey waves-effect" style="margin-bottom:0%" type="submit" id="fecth_submit" value="Reverse!"></input>
+			</div>
+		</div>
+	</form>
+	</div>
+  <div id="app"></div>
+  <script>
+  $("#fetch_cid").focus();
+  </script>
+  </main>
+  <div id="footer">
+  </div>
+  </body>
+  <script src="bundle.js"></script>
+</html>
