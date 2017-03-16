@@ -31,10 +31,7 @@ var Danmaku = React.createClass({
 			this.setState({
 				hovered:true
 			});
-			new Promise((resolve)=>
-			{
-				resolve();
-			}).then(()=>
+			Promise.resolve().then(()=>
 			{
 				let val = revCrc(this.props.hash);
 				this.setState({
