@@ -121,15 +121,27 @@ render(
 
 document.head.appendChild(document.createElement('style')).innerHTML = `.collection a.collection-item{overflow:hidden}
 span.badge{position:relative}
-span.badge .info_item{position:absolute;right:6px;transition:.3s;animation-iteration-count:1;animation-duration:.3s;top:-2px}
+span.badge .info_item{position:absolute;right:6px;animation-fill-mode:forwards;animation-iteration-count:1;animation-duration:.3s;opacity:0}
 span.badge .info_item.in{animation-name:slide_in}
-span.badge .info_item.out{top:calc(20px + 100%)}
+span.badge .info_item.out{animation-name:slide_out}
 @keyframes slide_in{
 	0%{
-		top:calc(-20px - 100%)
+		top:calc(-20px - 100%);
+		opacity:0
 	}
 	100%{
-		top:-2px
+		top:-2px;
+		opacity:1
+	}
+}
+@keyframes slide_out{
+	0%{
+		top:-2px;
+		opacity:1
+	}
+	100%{
+		top:calc(20px + 100%);
+		opacity:0
 	}
 }`
 
