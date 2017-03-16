@@ -36,10 +36,7 @@ var Danmaku = React.createClass({
 			this.setState({
 				hovered:true
 			});
-			new Promise((resolve)=>
-			{
-				resolve();
-			}).then(()=>
+			Promise.resolve().then(()=>
 			{
 				let val = revCrc(this.props.hash);
 				this.setState({
@@ -86,8 +83,6 @@ var Danmaku = React.createClass({
         },
         render:function () 
 		{
-			window.reactRef[this.props.id] = this;
-
 			var hoverAnime,
 			midClass = this.state.sbname.length>0?'info_item out':'info_item in';
 			if(this.state.hovered)
@@ -195,10 +190,4 @@ var xmlParse = function (xmlContent)
 	);
 }
 
-var findVirtualDom = function(id)
-{
-	return window.reactRef[id];
-}
-window.reactRef = new Object();
 window.xmlFecth = xmlFecth;
-window.findVirtualDom = findVirtualDom;
