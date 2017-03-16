@@ -4,6 +4,21 @@ import { render,unmountComponentAtNode,renderComponent } from 'react-dom';
 
 var revCrc = new crcRevEng.engine();
 var midCache = {};
+var midDOMList = {};
+window.cardJsonpResolver = function(data){
+	var card = data.cards[Object.keys(data.cards)[0]];
+	midCache[card.mid] = card.uname;
+	midDOMList[card.mid].find(function(item){
+		if(item.state.scriptele!=null){
+			item.state.scriptele.remove();
+		}
+		item.setState({
+			scriptele:null,
+			sbname:card.uname
+		});
+	});
+	delete midDOMList[card.mid];
+};
 var Danmaku = React.createClass({
         getInitialState:function () {
             return {
@@ -12,26 +27,19 @@ var Danmaku = React.createClass({
 				sbmid:"",
 				sbname:"",
 				fetchingMemberInfo:false,
-				scriptele:undefined
+				scriptele:null
             }
         },
-		handleMemberInfo:function(obj){
-			var uname = obj.cards[Object.keys(obj.cards)[0]].uname;
-			this.state.scriptele.remove();
-			delete this.state.scriptele;
-			midCache[this.state.sbmid] = uname;
-			this.setState({
-				scriptele:undefined,
-				sbname:uname
-			});
-		},
 		onMouseOver:function () {
 			if(this.state.hovered)
 				return;
 			this.setState({
 				hovered:true
 			});
-			Promise.resolve().then(()=>
+			new Promise((resolve)=>
+			{
+				resolve();
+			}).then(()=>
 			{
 				let val = revCrc(this.props.hash);
 				this.setState({
@@ -47,10 +55,12 @@ var Danmaku = React.createClass({
 					this.setState({
 						sbname:midCache[val]
 					})
-				} else
-				{
+				} else if(midDOMList[val]!=undefined){
+					midDOMList[val].push(this)
+				} else {
+					midDOMList[val] = [this];
 					const script = document.createElement("script");
-					script.src = `http://account.bilibili.com/api/member/getInfoByMid?mid=${val}&callback=findVirtualDom("${this.props.id}").handleMemberInfo&type=jsonp`;
+					script.src = `http://account.bilibili.com/api/member/getInfoByMid?mid=${val}&callback=cardJsonpResolver&type=jsonp`;
 					script.async = true;
 
 					var scriptele = document.body.appendChild(script);
