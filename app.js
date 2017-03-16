@@ -3,6 +3,7 @@ import crcRevEng from './crcRevEng';
 import { render,unmountComponentAtNode,renderComponent } from 'react-dom';
 
 var revCrc = new crcRevEng.engine();
+var midCache = {};
 var Danmaku = React.createClass({
         getInitialState:function () {
             return {
@@ -16,7 +17,9 @@ var Danmaku = React.createClass({
         },
 		handleMemberInfo:function(obj){
 			var uname = obj.cards[Object.keys(obj.cards)[0]].uname;
-			document.body.removeChild(this.state.scriptele);
+			this.state.scriptele.remove();
+			delete this.state.scriptele;
+			midCache[this.state.sbmid] = uname;
 			this.setState({
 				scriptele:undefined,
 				sbname:uname
@@ -28,12 +31,12 @@ var Danmaku = React.createClass({
 			this.setState({
 				hovered:true
 			});
-			var crcPromise = new Promise((resolve)=>
+			new Promise((resolve)=>
 			{
-				resolve(revCrc(this.props.hash));
-			})
-			crcPromise.then((val)=>
+				resolve();
+			}).then(()=>
 			{
+				let val = revCrc(this.props.hash);
 				this.setState({
 					sbmid:val
 				});
@@ -43,7 +46,11 @@ var Danmaku = React.createClass({
 						sbname:"匿名者"
 					});
 				}
-				else
+				else if(midCache[val]!=undefined){
+					this.setState({
+						sbname:midCache[val]
+					})
+				} else
 				{
 					const script = document.createElement("script");
 					script.src = `http://account.bilibili.com/api/member/getInfoByMid?mid=${val}&callback=findVirtualDom("${this.props.id}").handleMemberInfo&type=jsonp`;
@@ -74,12 +81,13 @@ var Danmaku = React.createClass({
 		{
 			window.reactRef[this.props.id] = this;
 
-			var hoverAnime ;
+			var hoverAnime,
+			midClass = this.state.sbname.length>0?'info_item out':'info_item in';
 			if(this.state.hovered)
 				hoverAnime = <script></script>;
             return <div onMouseOver={this.onMouseOver} style={{height:"40px"}} is mid={this.state.sbmid}>
 			<a href={"http://space.bilibili.com/"+this.state.sbmid} target="view_window" style={{width:"100%",height:"100%",textOverflow: "ellipsis",whiteSpace: "nowrap"}} className="collection-item waves-effect black-text">
-			<span style={{float: "right",overflow: "hidden",height:this.state.midheight}} className="badge grey-text">{this.state.sbname.length >0 ? this.state.sbname : this.state.sbmid}</span>
+			<span style={{float: "right",height:this.state.midheight}} className="badge grey-text">{this.state.sbname.length > 0 ? <span className="info_item in">{this.state.sbname}</span> : ''}{this.state.sbmid != "" ? <span className={midClass}>{this.state.sbmid}</span> : ''}</span>
 			{this.props.content}</a>
 			{hoverAnime}
 			</div>;
@@ -110,6 +118,20 @@ render(
 </div>,
   document.getElementById('footer')
 );
+
+document.head.appendChild(document.createElement('style')).innerHTML = `.collection a.collection-item{overflow:hidden}
+span.badge{position:relative}
+span.badge .info_item{position:absolute;right:6px;transition:.3s;animation-iteration-count:1;animation-duration:.3s;top:-2px}
+span.badge .info_item.in{animation-name:slide_in}
+span.badge .info_item.out{top:calc(20px + 100%)}
+@keyframes slide_in{
+	0%{
+		top:calc(-20px - 100%)
+	}
+	100%{
+		top:-2px
+	}
+}`
 
 
 var xmlFecth = function ()
