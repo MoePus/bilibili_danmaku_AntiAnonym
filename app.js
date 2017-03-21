@@ -5,53 +5,68 @@ import { render,unmountComponentAtNode,renderComponent } from 'react-dom';
 var revCrc = new crcRevEng.engine();
 var midCache = {};
 var midDOMList = {};
+var crcQueue = [];
+var crcResolver = function(){
+	if(crcQueue.length>0){
+		var crc = crcQueue.shift();
+		var mid = revCrc(crc.hash);
+		crc.cb(mid);
+	}
+}
+setInterval(crcResolver,100);
 window.cardJsonpResolver = function(data){
 	var card = data.cards[Object.keys(data.cards)[0]];
 	midCache[card.mid] = card.uname;
-	midDOMList[card.mid].find(function(item){
-		if(item.state.scriptele!=null){
-			item.state.scriptele.remove();
+	let span = document.createElement('span');
+	span.className='info_item in';
+	span.appendChild(document.createTextNode(card.uname));
+	midDOMList[card.mid].forEach(function(item){
+		if(item.scriptele!=null){
+			item.scriptele.remove();
+			item.scriptele=null;
 		}
-		item.setState({
-			scriptele:null,
-			sbname:card.uname
-		});
+		item.dom.querySelector('.badge').firstChild.className='info_item out';
+		span=span.cloneNode(true);
+		item.dom.querySelector('.badge').appendChild(span);
 	});
 	delete midDOMList[card.mid];
 };
 var Danmaku = React.createClass({
-        getInitialState:function () {
-            return {
-                hovered:false,
-				midheight:"0%",
-				sbmid:"",
-				sbname:"",
-				fetchingMemberInfo:false,
-				scriptele:null
-            }
-        },
+		getInitialState:function () {
+			this.hovered=false;
+			this.scriptele=null;
+			return {};
+		},
 		onMouseOver:function () {
-			if(this.state.hovered)
+			if(this.hovered)
 				return;
-			this.setState({
-				hovered:true
-			});
-			Promise.resolve().then(()=>
+			this.hovered=true;
+			this.dom = document.querySelector('#'+this.props.id);
+			this.dom.appendChild(document.createElement('script'));
+			console.log(this)
+			var hash=this.props.hash
+			new Promise(function(resolve){
+				crcQueue.push({hash:hash,cb:resolve});
+			}).then((val)=>
 			{
-				let val = revCrc(this.props.hash);
-				this.setState({
-					sbmid:val
-				});
+				this.dom.setAttribute('mid',val);
+				this.dom.firstChild.href='http://space.bilibili.com/'+val;
+				let span = document.createElement('span');
+				span.className='info_item in';
+				span.appendChild(document.createTextNode(val));
+				this.dom.querySelector('.badge').appendChild(span);
 				if(val==-1)
 				{
-					this.setState({
-						sbname:"匿名者"
-					});
+					span = span.cloneNode();
+					this.dom.querySelector('.badge').firstChild.className='info_item out';
+					span.appendChild(document.createTextNode('匿名者'));
+					this.dom.querySelector('.badge').appendChild(span);
 				}
 				else if(midCache[val]!=undefined){
-					this.setState({
-						sbname:midCache[val]
-					})
+					span = span.cloneNode();
+					this.dom.querySelector('.badge').firstChild.className='info_item out';
+					span.appendChild(document.createTextNode(midCache[val]));
+					this.dom.querySelector('.badge').appendChild(span);
 				} else if(midDOMList[val]!=undefined){
 					midDOMList[val].push(this)
 				} else {
@@ -61,47 +76,35 @@ var Danmaku = React.createClass({
 					script.async = true;
 
 					var scriptele = document.body.appendChild(script);
-					this.setState({
-						scriptele:scriptele
-					});
+					this.scriptele=scriptele;
 				}
 			});
-			const fadeInTime = 80;
-			var fadeStart = Date.now();
-			var fadeInAnime = ()=>
-			{
-				var elapsedTime = Date.now() - fadeStart;
-				var fadePercent = Math.round(Math.min(100,1.0*elapsedTime/fadeInTime*100)) + '%';
-				this.setState({
-					midheight:fadePercent
-				});
-				if(elapsedTime<fadeInTime)
-					setTimeout(fadeInAnime,16);
-			};
-			setTimeout(fadeInAnime,16);
-			return;
-        },
-        render:function () 
+		},
+		render:function () 
 		{
-			var hoverAnime,
-			midClass = this.state.sbname.length>0?'info_item out':'info_item in';
-			if(this.state.hovered)
-				hoverAnime = <script></script>;
-            return <div onMouseOver={this.onMouseOver} style={{height:"40px"}} is mid={this.state.sbmid}>
+			return <div id={this.props.id} onMouseOver={this.onMouseOver} style={{height:"40px"}} is mid="">
+				<a href="javascript:" target="view_window" style={{width:"100%",height:"100%",textOverflow: "ellipsis",whiteSpace: "nowrap"}} className="collection-item black-text">
+					<span style={{float:'right'}} className="badge grey-text"></span>
+					{this.props.content}
+				</a>
+			</div>;
+			/*
+			this.dom = <div onMouseOver={this.onMouseOver} style={{height:"40px"}} is mid="">
 			<a href={"http://space.bilibili.com/"+this.state.sbmid} target="view_window" style={{width:"100%",height:"100%",textOverflow: "ellipsis",whiteSpace: "nowrap"}} className="collection-item waves-effect black-text">
 			<span style={{float: "right",height:this.state.midheight}} className="badge grey-text">{this.state.sbname.length > 0 ? <span className="info_item in">{this.state.sbname}</span> : ''}{this.state.sbmid != "" ? <span className={midClass}>{this.state.sbmid}</span> : ''}</span>
 			{this.props.content}</a>
 			{hoverAnime}
 			</div>;
-        }
+			*/
+		}
    });
 
 render(
 <div>
   <div style={{marginLeft:"20%",width:"60%"}}> 
-      <div className="col s12">
-        <p className="center-on-small-only">{"Content>"}</p>
-      </div>
+	  <div className="col s12">
+		<p className="center-on-small-only">{"Content>"}</p>
+	  </div>
    <div className="collection" id="danmakucore"></div>
   </div>
 </div>,
@@ -111,11 +114,11 @@ render(
 render(
 <div>
   <footer className="page-footer grey">
-    <div className="footer-copyright">
-      <div className="container grey-text text-lighten-2">
-      <span>Made by <a className="orange-text text-lighten-3" href="http://www.moepus.com">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="http://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
-      </div>
-    </div>
+	<div className="footer-copyright">
+	  <div className="container grey-text text-lighten-2">
+	  <span>Made by <a className="orange-text text-lighten-3" href="http://www.moepus.com">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="http://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
+	  </div>
+	</div>
   </footer>
 </div>,
   document.getElementById('footer')
