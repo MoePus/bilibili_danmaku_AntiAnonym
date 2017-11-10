@@ -70,7 +70,7 @@ var BiliBili_midcrc = function () {
 					break;
 			}
 		}
-		return (i == 1e5) ? -1 : (i + '' + deepCheckData);
+		return (i == 3e5) ? -1 : (i + '' + deepCheckData);
 	};
 };
 var engine = new BiliBili_midcrc();
