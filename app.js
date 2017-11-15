@@ -17,7 +17,7 @@ window.cardJsonpResolver = function (data) {
 	});
 	delete midDOMList[card.mid];
 };
-var revCrc = new Worker('crcRevEng.min.js');
+var revCrc = new Worker('crcRevEng.min.js?ver=171110');
 revCrc.onmessage = function (e) {
 	let [hash, val] = e.data;
 	if (!crcResolveQueue[hash]) return;
@@ -28,6 +28,7 @@ revCrc.onmessage = function (e) {
 		});
 		if (val == -1) {
 			danmaku.setState({
+				sbmid: '',
 				sbname: "*匿名者*"
 			});
 		}
@@ -68,7 +69,12 @@ var Danmaku = React.createClass({
 			hovered: true
 		});
 		let hash = this.props.hash;
-		if (hash.substr(0, 1) == 'D') hash = hash.substr(1);
+		if (hash.substr(0, 1) == 'D') {
+			this.setState({
+				sbname: '*游客*'
+			});
+			return;
+		}
 		revCrc.postMessage(hash);
 		crcResolveQueue[hash] = crcResolveQueue[hash] || [];
 		crcResolveQueue[hash].push(this);
