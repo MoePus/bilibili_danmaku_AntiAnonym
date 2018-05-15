@@ -17,7 +17,7 @@ window.cardJsonpResolver = function (data) {
 	});
 	delete midDOMList[card.mid];
 };
-var revCrc = new Worker('crcRevEng.min.js');
+var revCrc = new Worker('crcRevEng.min.js?ver=171110');
 revCrc.onmessage = function (e) {
 	let [hash, val] = e.data;
 	if (!crcResolveQueue[hash]) return;
@@ -28,6 +28,7 @@ revCrc.onmessage = function (e) {
 		});
 		if (val == -1) {
 			danmaku.setState({
+				sbmid: '',
 				sbname: "*匿名者*"
 			});
 		}
@@ -68,6 +69,12 @@ var Danmaku = React.createClass({
 			hovered: true
 		});
 		let hash = this.props.hash;
+		if (hash.substr(0, 1) == 'D') {
+			this.setState({
+				sbname: '*游客*'
+			});
+			return;
+		}
 		revCrc.postMessage(hash);
 		crcResolveQueue[hash] = crcResolveQueue[hash] || [];
 		crcResolveQueue[hash].push(this);
@@ -77,10 +84,10 @@ var Danmaku = React.createClass({
 		var hoverAnime,
 			midClass = this.state.sbname.length > 0 ? 'info_item out' : 'info_item in';
 		if (this.state.hovered)
-			hoverAnime = <style></style>;
-		return <div class={this.state.sbname!=''?'show-name':this.state.sbmid!=''?'show-mid':this.state.hovered?'show-hash':''} onMouseOver={this.onMouseOver} style={{ height: "40px", overflow: "hidden" }} is mid={this.state.sbmid}>
-			<a href={"//space.bilibili.com/" + this.state.sbmid} target="view_window" style={{ width: "100%", height: "100%", textOverflow: "ellipsis", whiteSpace: "nowrap" }} className="collection-item waves-effect black-text">
-				<span style={{ float: "right" }} className="badge grey-text"><span className="info_item">{this.state.sbname}</span><span className="info_item">{this.state.sbmid}</span><span className="info_item">{this.props.hash}</span><span className="info_item"></span></span>
+			hoverAnime = <meta />;
+		return <div class={this.state.sbname != '' ? 'show-name' : this.state.sbmid != '' ? 'show-mid' : this.state.hovered ? 'show-hash' : ''} onMouseOver={this.onMouseOver} style={{ height: "40px", overflow: "hidden" }} is mid={this.state.sbmid}>
+			<a href={this.state.sbmid ? "//space.bilibili.com/" + this.state.sbmid : 'javascript:'} target="view_window" style={{ width: "100%", height: "100%", textOverflow: "ellipsis", whiteSpace: "nowrap" }} className="collection-item waves-effect black-text">
+				<span style={{ float: "right" }} className="badge grey-text"><span className="info_item">Name: {this.state.sbname}</span><span className="info_item">UID: {this.state.sbmid}</span><span className="info_item">Hash: {this.props.hash}</span><span className="info_item"></span></span>
 				{this.props.content}</a>
 			{hoverAnime}
 		</div>;
@@ -120,13 +127,15 @@ span.badge{position:relative;height:160px;display:flex;margin-top:-10px !importa
 span.badge .info_item{flex:1;padding:10px 0}`
 
 
-var xmlFecth = function () {
+var xmlFetch = function () {
+	let cid = $("#fetch_cid").val();
+	if (/^[1-9]\d+$/.test(cid) === false) return Materialize.toast('无效cid号', 4000);
+	cid = cid | 0;
 	$.ajax(
 		{
-			url: "//comment.bilibili.com/" + parseInt($("#fetch_cid").val()) + ".xml",
+			url: "//comment.bilibili.com/" + cid + ".xml",
 			dataType: 'xml',
 			success: function (data) {
-				unmountComponentAtNode(document.getElementById('danmakucore'));
 				xmlParse(data);
 				$("#progressBar").slideUp();
 			},
@@ -136,8 +145,9 @@ var xmlFecth = function () {
 		});
 	$("#progressBar").slideDown();
 }
+var warehouse;
 var xmlParse = function (xmlContent) {
-	var warehouse = new Array();
+	warehouse = new Array();
 	$(xmlContent).find("d").each(function (i) {
 		var p = $(this).attr("p");
 		var dAttrs = p.split(",");;
@@ -145,15 +155,44 @@ var xmlParse = function (xmlContent) {
 		var id = "id" + Math.random().toString(16).slice(2);
 		warehouse.push({ content: text, hash: dAttrs[6], time: dAttrs[4], id: id });
 	});
+	renderPage(1);
+}
+function renderPage(page) {
+	let pages = Math.ceil(warehouse.length / 500);
+	let child = [];
+	for (let i = 0, offset; i < 500; i++) {
+		offset = (page - 1) * 500 + i;
+		if (offset >= warehouse.length) break;
+		child.push(warehouse[offset]);
+	}
+	warehouse.length == 0 && (page = 0);
+	let pageele = [];
+	pageele.push(page > 1 ?
+		<li className="waves-effect" onClick={renderPage.bind(null, 1)} key="page_first"><a href="javascript:"><i className="material-icons">chevron_left</i></a></li> :
+		<li className="disabled" key="page_first"><a><i className="material-icons">chevron_left</i></a></li>)
+	for (let i = page - 4; i < page + 5; i++) {
+		if (i == page)
+			pageele.push(<li className="active" key={"page_" + i}><a>{i}/{pages}</a></li>);
+		else if (i > 0 && i <= pages)
+			pageele.push(<li className="waves-effect" key={"page_" + i} onClick={renderPage.bind(null, i)}><a href="javascript:">{i}</a></li>);
+	}
+	pageele.push(page < pages ?
+		<li className="waves-effect" onClick={renderPage.bind(null, pages)} key="page_last"><a href="javascript:"><i className="material-icons">chevron_right</i></a></li> :
+		<li className="disabled" key="page_last"><a href="javascript:"><i className="material-icons">chevron_right</i></a></li>)
+	unmountComponentAtNode(document.getElementById('danmakucore'));
 	render(
 		<div>
-			{warehouse.map(ware => {
+			{child.map(ware => {
 				return <Danmaku content={ware.content} hash={ware.hash} time={ware.time} key={ware.id} id={ware.id} />;
 			})}
+			<ul className="pagination" style={{ textAlign: "center" }}>
+				{pageele}
+			</ul>
 		</div>
 		,
 		document.getElementById('danmakucore')
 	);
+	$('html, body').animate({ scrollTop: 0 }, 300, 'linear')
 }
 
-window.xmlFecth = xmlFecth;
+window.xmlFetch = xmlFetch;

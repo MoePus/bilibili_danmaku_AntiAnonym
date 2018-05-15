@@ -6,6 +6,7 @@
 	<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 	<script src="//cdn.bootcss.com/materialize/0.98.0/js/materialize.min.js"></script>
 	<link type="text/css" rel="stylesheet" href="//cdn.bootcss.com/materialize/0.98.0/css/materialize.min.css" media="screen,projection">
+	<link type="text/css" rel="stylesheet" href="https://fonts.cat.net/icon?family=Material+Icons" media="screen,projection">
 	<!--<script src="/webpack-dev-server.js"></script>-->
   </head>
   <body class="grey lighten-2">
@@ -43,25 +44,25 @@
 	<br>
 	<br>
 	<div class="container">
-	<form style="display:inline" action="javascript:void(0);xmlFecth();">
+	<form style="display:inline" action="javascript:void(0);xmlFetch();">
 		<div class="row">
 			<div class="input-field col s2">
-				<input class="validate" type="text" id="fetch_cid" placeholder="cid"></input>
+				<input class="validate" type="text" id="fetch_cid"></input>
 				<label for="fetch_cid" class="active">fetch</label>
 			</div>
-			<div class="input-field col s5">
-				<input class="col s3 btn blue-grey waves-effect" style="margin-bottom:0%" type="submit" id="fecth_submit" value="Reverse!"></input>
+			<div class="input-field col s5" onclick="if(event.target.tagName.toLowerCase()!='input')this.querySelector('input').click()">
+				<input class="col s3 btn blue-grey waves-effect" style="margin-bottom:0%" type="submit" id="fecth_submit" value="Reverse!">
 			</div>
 		</div>
 	</form>
 	</div>
   <div id="app"></div>
   <script>
-  $("#fetch_cid").focus();
+  $(window).load(function(){$("#fetch_cid").focus();})
   </script>
   </main>
   <div id="footer">
   </div>
   </body>
-  <script src="bundle.js"></script>
+  <script src="bundle.js?ver=171111"></script>
 </html>
