@@ -63,14 +63,14 @@ var BiliBili_midcrc = function () {
 			snum = crctable[index[3 - i]];
 			ht ^= snum >>> ((3 - i) * 8);
 		}
-		for (i = 0; i < 3e5; i++) {
+		for (i = 0; i < 1e6; i++) {
 			lastindex = crc32(i.toString(), !0);
 			if (lastindex == index[3]) {
 				if (deepCheck(i, index))
 					break;
 			}
 		}
-		return (i == 3e5) ? -1 : (i + '' + deepCheckData);
+		return (i == 1e6) ? -1 : (i + '' + deepCheckData);
 	};
 };
 var engine = new BiliBili_midcrc();

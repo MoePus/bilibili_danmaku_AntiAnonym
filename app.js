@@ -128,11 +128,12 @@ span.badge .info_item{flex:1;padding:10px 0}`
 
 
 var xmlFetch = function () {
-	let cid = parseInt($("#fetch_cid").val());
-	if (cid == 0 || isNaN(cid)) return;
+	let cid = $("#fetch_cid").val();
+	if (/^[1-9]\d+$/.test(cid) === false) return Materialize.toast('无效cid号', 4000);
+	cid = cid | 0;
 	$.ajax(
 		{
-			url: "//comment.bilibili.com/" + parseInt($("#fetch_cid").val()) + ".xml",
+			url: "//comment.bilibili.com/" + cid + ".xml",
 			dataType: 'xml',
 			success: function (data) {
 				xmlParse(data);
