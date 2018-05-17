@@ -235,7 +235,7 @@ var xmlFetchHistory = function (ts) {
 }
 var warehouse;
 var xmlParse = function (xmlContent) {
-	$('#loaded-hint').text('已加载'+(loaded?(' '+dateString(new Date(loaded * 1e3), true)+' 的'):'最新')+'弹幕');
+	$('#loaded-hint').text('已加载'+(loaded?(' '+dateString(new Date(loaded * 1e3), true)+' 的'):'最新')+'弹幕（'+$(xmlContent).find("d").length+'条）');
 	warehouse = new Array();
 	$(xmlContent).find("d").each(function (i) {
 		var p = $(this).attr("p");
