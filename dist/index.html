@@ -44,9 +44,16 @@
 	.flatpickr-day {
 		line-height: 30px
 	}
+	input[type=submit] {
+		color:#FFF
+	}
+	.dm_info {
+		color: #888;
+		font-size: 13px;
+	}
 	</style>
   	<header>
-	<nav class="top-nav grey" style="height:12%">
+	<nav class="top-nav grey" style="height:180px">
 	  <div class="container">
 		<div class="row">
 		  <div class="col s12 m9">
@@ -66,14 +73,14 @@
 	<br>
 	<br>
 	<div class="container">
-	<form style="display:inline" action="javascript:void(0);xmlFetch();">
+	<form style="display:inline" onsubmit="xmlFetch();return false;">
 		<div class="row">
 			<div class="input-field col s2">
-				<input class="validate" type="text" id="fetch_cid"></input>
+				<input class="validate" type="text" id="fetch_cid" pattern="\d+"></input>
 				<label for="fetch_cid" class="active">fetch</label>
 			</div>
 			<div class="input-field col s5" id="btn-row">
-				<a class="waves-effect waves-light btn blue-grey" id="fecth_submit" onclick="this.parentNode.parentNode.parentNode.submit()">Reverse!</a>
+				<span onclick="if(event.target.tagName.toLowerCase()!='input')this.querySelector('input').click()"><input type="submit" class="waves-effect waves-light btn blue-grey" id="fecth_submit" value="Reverse!"></span>
 				<span id="loaded-hint"></span>
 				<span id="view-history" style="display:none">，查看<a href="javascript:" id="history_pickr">历史弹幕</a></span>
 			</div>

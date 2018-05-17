@@ -5,14 +5,14 @@ var midCache = {};
 var midDOMList = {};
 window.cardJsonpResolver = function (data) {
 	var card = data.cards[Object.keys(data.cards)[0]];
-	midCache[card.mid] = card.uname;
+	midCache[card.mid] = card.uname + ' Lv' + card.level_info.current_level;
 	midDOMList[card.mid].forEach(function (item) {
 		if (item.state.scriptele != null) {
 			item.state.scriptele.remove();
 		}
 		item.setState({
 			scriptele: null,
-			sbname: card.uname
+			sbname: card.uname + ' lv' + card.level_info.current_level
 		});
 	});
 	delete midDOMList[card.mid];
@@ -29,7 +29,7 @@ revCrc.onmessage = function (e) {
 		if (val == -1) {
 			danmaku.setState({
 				sbmid: '',
-				sbname: "*匿名者*"
+				sbname: "*匿名者* (" + hash + ")"
 			});
 		}
 		else if (midCache[val] != undefined) {
@@ -40,11 +40,7 @@ revCrc.onmessage = function (e) {
 			midDOMList[val].push(danmaku)
 		} else {
 			midDOMList[val] = [danmaku];
-			const script = document.createElement("script");
-			script.src = `//account.bilibili.com/api/member/getInfoByMid?mid=${val}&callback=cardJsonpResolver&type=jsonp`;
-			script.async = true;
-
-			var scriptele = document.body.appendChild(script);
+			const scriptele = document.body.appendChild(_("script", { src: `//account.bilibili.com/api/member/getInfoByMid?mid=${val}&callback=cardJsonpResolver&type=jsonp`, async: true }));
 			danmaku.setState({
 				scriptele: scriptele
 			});
@@ -85,10 +81,10 @@ var Danmaku = React.createClass({
 			midClass = this.state.sbname.length > 0 ? 'info_item out' : 'info_item in';
 		if (this.state.hovered)
 			hoverAnime = <meta />;
-		return <div class={this.state.sbname != '' ? 'show-name' : this.state.sbmid != '' ? 'show-mid' : this.state.hovered ? 'show-hash' : ''} onMouseOver={this.onMouseOver} style={{ height: "40px", overflow: "hidden" }} is mid={this.state.sbmid}>
+		return <div class={this.state.sbname != '' ? 'show-name' : this.state.sbmid != '' ? 'show-mid' : this.state.hovered ? 'show-hash' : ''} onMouseOver={this.onMouseOver} style={{ height: "62px", overflow: "hidden" }} is mid={this.state.sbmid}>
 			<a href={this.state.sbmid ? "//space.bilibili.com/" + this.state.sbmid : 'javascript:'} target="view_window" style={{ width: "100%", height: "100%", textOverflow: "ellipsis", whiteSpace: "nowrap" }} className="collection-item waves-effect black-text">
 				<span style={{ float: "right" }} className="badge grey-text"><span className="info_item">Name: {this.state.sbname}</span><span className="info_item">UID: {this.state.sbmid}</span><span className="info_item">Hash: {this.props.hash}</span><span className="info_item"></span></span>
-				{this.props.content}</a>
+				{this.props.content}<br /><span className="dm_info">{this.props.dateStr} @ {this.props.timeStr}</span></a>
 			{hoverAnime}
 		</div>;
 	}
@@ -111,7 +107,7 @@ render(
 		<footer className="page-footer grey">
 			<div className="footer-copyright">
 				<div className="container grey-text text-lighten-2">
-					<span>Made by <a className="orange-text text-lighten-3" href="http://moepus.oicp.net/">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="http://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
+					<span>Made by <a className="orange-text text-lighten-3" href="http://moepus.oicp.net/">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="https://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
 				</div>
 			</div>
 		</footer>
@@ -120,11 +116,11 @@ render(
 );
 
 document.head.appendChild(document.createElement('style')).innerHTML = `.collection a.collection-item{overflow:hidden}
-span.badge{position:relative;height:160px;display:flex;margin-top:-10px !important;top:-120px;transition:top .3s;flex-direction:column;text-align:right}
-.show-hash span.badge{top:-40px}
-.show-mid span.badge{top:-40px}
+span.badge{position:relative;height:160px;display:flex;margin-top:-10px !important;top:-186px;transition:top .3s;flex-direction:column;text-align:right}
+.show-hash span.badge{top:-124px}
+.show-mid span.badge{top:-62px}
 .show-name span.badge{top:0}
-span.badge .info_item{flex:1;padding:10px 0}`
+span.badge .info_item{flex:1;padding:20px 0}`
 
 function dateString(date, useLocal) {
 	return (useLocal ? [date.getFullYear(), date.getMonth() + 1, date.getDate()] : [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]).join('.');
@@ -166,7 +162,7 @@ var history_pickr;
 var history_count;
 var xmlFetch = function () {
 	cid = $("#fetch_cid").val();
-	if (/^[1-9]\d+$/.test(cid) === false) return Materialize.toast('无效cid号', 4000);
+	if (/^[1-9]\d*$/.test(cid) === false) return M.toast({ html: '无效cid号', displayLength: 4000 });
 	$('#loaded-hint').text('');
 	$('#view-history').hide();
 	cid = cid | 0;
@@ -176,7 +172,7 @@ var xmlFetch = function () {
 		dataType: 'xml',
 		success: function (data) {
 			$.ajax({
-				url: 'https://www.biliplus.com/danmaku/rolldate,'+cid,
+				url: 'https://www.biliplus.com/danmaku/rolldate,' + cid,
 				//url: 'http://localhost/danmaku/rolldate,' + cid,
 				dataType: 'json',
 				success: function (data) {
@@ -219,7 +215,7 @@ var xmlFetch = function () {
 }
 var xmlFetchHistory = function (ts) {
 	$.ajax({
-		url: 'https://www.biliplus.com/danmaku/dmroll,'+ ts + ',' + cid,
+		url: 'https://www.biliplus.com/danmaku/dmroll,' + ts + ',' + cid,
 		//url: 'http://localhost/danmaku/dmroll,'+ ts + ',' + cid,
 		dataType: 'xml',
 		success: function (data) {
@@ -234,15 +230,19 @@ var xmlFetchHistory = function (ts) {
 	$("#progressBar").slideDown();
 }
 var warehouse;
+var padDigit = function (i) { return i < 10 ? '0' + i : i; }
 var xmlParse = function (xmlContent) {
-	$('#loaded-hint').text('已加载'+(loaded?(' '+dateString(new Date(loaded * 1e3), true)+' 的'):'最新')+'弹幕（'+$(xmlContent).find("d").length+'条）');
+	$('#loaded-hint').text('已加载' + (loaded ? (' ' + dateString(new Date(loaded * 1e3), true) + ' 的') : '最新') + '弹幕（' + $(xmlContent).find("d").length + '条）');
 	warehouse = new Array();
 	$(xmlContent).find("d").each(function (i) {
 		var p = $(this).attr("p");
 		var dAttrs = p.split(",");;
 		var text = $(this).text();
 		var id = "id" + Math.random().toString(16).slice(2);
-		warehouse.push({ content: text, hash: dAttrs[6], time: dAttrs[4], id: id });
+		var date = new Date(dAttrs[4] * 1e3);
+		var dateStr = [date.getFullYear(), padDigit(date.getMonth() + 1), padDigit(date.getDate())].join('/') + ' ' + padDigit(date.getHours()) + ':' + padDigit(date.getMinutes()) + ':' + padDigit(date.getSeconds());
+		var timeStr = (function (t) { t = parseFloat(t) | 0; var min = (t / 60) | 0, sec = (t % 60); return padDigit(min) + ':' + padDigit(sec) })(dAttrs[0]);
+		warehouse.push({ content: text, hash: dAttrs[6], time: dAttrs[4], id: id, dateStr, timeStr });
 	});
 	renderPage(1);
 }
@@ -272,7 +272,7 @@ function renderPage(page) {
 	render(
 		<div>
 			{child.map(ware => {
-				return <Danmaku content={ware.content} hash={ware.hash} time={ware.time} key={ware.id} id={ware.id} />;
+				return <Danmaku content={ware.content} hash={ware.hash} time={ware.time} key={ware.id} id={ware.id} dateStr={ware.dateStr} timeStr={ware.timeStr} />;
 			})}
 			<ul className="pagination" style={{ textAlign: "center" }}>
 				{pageele}
