@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8">
     <title>Reverse!</title>
-	<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
-	<script src="//cdn.bootcss.com/materialize/0.98.0/js/materialize.min.js"></script>
-	<link type="text/css" rel="stylesheet" href="//cdn.bootcss.com/materialize/0.98.0/css/materialize.min.css" media="screen,projection">
-	<link type="text/css" rel="stylesheet" href="https://fonts.cat.net/icon?family=Material+Icons" media="screen,projection">
+	<script src="jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+	<script src="https://unpkg.com/flatpickr@4.4.4"></script>
+	<script src="https://unpkg.com/flatpickr@4.4.4/dist/l10n/zh.js" async></script>
+	<link rel="stylesheet" href="https://unpkg.com/flatpickr@4.4.4/dist/flatpickr.min.css">
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css" media="screen,projection">
+	<link type="text/css" rel="stylesheet" href="https://fonts.loli.net/icon?family=Material+Icons" media="screen,projection">
 	<!--<script src="/webpack-dev-server.js"></script>-->
   </head>
   <body class="grey lighten-2">
@@ -22,14 +25,40 @@
 	main {
 		flex: 1 0 auto;
 	}
+	.date_new {
+		line-height: 11px;
+		font-size: 11px;
+		position: absolute;
+		width: 100%;
+		left: 0;
+		bottom: 3px;
+		font-weight: bold;
+		color: #AAA;
+	}
+	.prevMonthDay .date_new,.nextMonthDay .date_new {
+		color:#DDD
+	}
+	.selected .date_new {
+		color:#EEE
+	}
+	.flatpickr-day {
+		line-height: 30px
+	}
+	input[type=submit] {
+		color:#FFF
+	}
+	.dm_info {
+		color: #888;
+		font-size: 13px;
+	}
 	</style>
   	<header>
-	<nav class="top-nav grey" style="height:12%">
+	<nav class="top-nav grey" style="height:180px">
 	  <div class="container">
 		<div class="row">
 		  <div class="col s12 m9">
-				<h1 class="header center-on-small-only"  style="margin-top:2% height:6%">Reverse!</h1>
-				<h4 class="light center-on-small-only"  style="margin-bottom:0% height:2%">Fetch bilibili danmaku&amp;Reverse out the author</h4>
+				<h1 class="header center-on-small-only"  style="margin-top:2%;height:6%">Reverse!</h1>
+				<h4 class="light center-on-small-only"  style="margin-bottom:0%;height:2%">Fetch bilibili danmaku&amp;Reverse out the author</h4>
 		  </div>
 		</div>
 	  </div>
@@ -44,14 +73,16 @@
 	<br>
 	<br>
 	<div class="container">
-	<form style="display:inline" action="javascript:void(0);xmlFetch();">
+	<form style="display:inline" onsubmit="xmlFetch();return false;">
 		<div class="row">
 			<div class="input-field col s2">
-				<input class="validate" type="text" id="fetch_cid"></input>
+				<input class="validate" type="text" id="fetch_cid" pattern="\d+"></input>
 				<label for="fetch_cid" class="active">fetch</label>
 			</div>
-			<div class="input-field col s5" onclick="if(event.target.tagName.toLowerCase()!='input')this.querySelector('input').click()">
-				<input class="col s3 btn blue-grey waves-effect" style="margin-bottom:0%" type="submit" id="fecth_submit" value="Reverse!">
+			<div class="input-field col s5" id="btn-row">
+				<span onclick="if(event.target.tagName.toLowerCase()!='input')this.querySelector('input').click()"><input type="submit" class="waves-effect waves-light btn blue-grey" id="fecth_submit" value="Reverse!"></span>
+				<span id="loaded-hint"></span>
+				<span id="view-history" style="display:none">，查看<a href="javascript:" id="history_pickr">历史弹幕</a></span>
 			</div>
 		</div>
 	</form>
@@ -64,5 +95,5 @@
   <div id="footer">
   </div>
   </body>
-  <script src="bundle.js?ver=171111"></script>
+  <script src="bundle.js?ver=180517"></script>
 </html>
