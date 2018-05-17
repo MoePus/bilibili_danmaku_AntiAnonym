@@ -107,7 +107,7 @@ render(
 		<footer className="page-footer grey">
 			<div className="footer-copyright">
 				<div className="container grey-text text-lighten-2">
-					<span>Made by <a className="orange-text text-lighten-3" href="http://moepus.oicp.net/">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="https://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
+					<span>Made by <a className="orange-text text-lighten-3" href="http://moepus.oicp.net/">MoePus</a>　　·　　<a className="grey-text  text-lighten-1" href="https://materializecss.com/">materializecss</a> · <a className="grey-text  text-lighten-1" href="https://flatpickr.js.org/">flatpickr</a> · <a className="grey-text  text-lighten-1" href="https://www.biliplus.com">biliplus</a></span>
 				</div>
 			</div>
 		</footer>
